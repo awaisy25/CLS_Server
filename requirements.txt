@@ -1,0 +1,8 @@
+Django
+django-widget-tweaks
+djangorestframework
+django-environ
+pytz
+psycopg2-binary
+martor
+gunicorn
