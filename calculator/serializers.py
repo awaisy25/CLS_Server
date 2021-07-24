@@ -27,24 +27,43 @@ class CalculateSerializer(serializers.Serializer):
     Budget = serializers.FloatField()
     Job = serializers.SerializerMethodField('get_job_object')
     University = serializers.SerializerMethodField('get_unv_object')
+    Loan_total = serializers.SerializerMethodField('get_loan_total')
     Years = serializers.IntegerField(max_value=6, min_value=1)
     Percent_income = serializers.FloatField(max_value=100, min_value=1)
     Interest_rate = serializers.FloatField(max_value=50, min_value=1)
     In_state = serializers.BooleanField(default=False)
-
+    
     #method to get the job data based on the Job_ID passed in. Share the serialized data
     def get_job_object(self, obj):
         job_id = obj['Job_ID']
-        job_data = Job.objects.get(id=job_id)
+        try:
+            job_data = Job.objects.get(id=job_id)
         #print(JobSerializer(job_data).data)
-        return JobSerializer(job_data).data
+            return JobSerializer(job_data).data
+        except Job.DoesNotExist:
+            raise serializers.ValidationError({'Job Error': f'Job ID {job_id} not exist in database'})
     #method to get the university data based on the University_ID passed in. Share the serialized data
     def get_unv_object(self, obj):
+        try:
+            unv_id = obj['University_ID']
+            unv_data = University.objects.get(id=unv_id)
+            return UniversitySerializer(unv_data).data
+        except University.DoesNotExist:
+            raise serializers.ValidationError({'University Error': f'University ID {unv_id} not exist in database'})
+    #method to get the loan total after graduation. Raise validation error is budget is greater than tuition
+    #Calculation include university tuition (in state or out state), budget and years
+    def get_loan_total(self, obj):
         unv_id = obj['University_ID']
         unv_data = University.objects.get(id=unv_id)
-        return UniversitySerializer(unv_data).data
-    
-    #def get_salary_object(self, ob)
-
+        yearly_budget = obj['Budget']
+        years = obj['Years']
+        #checking if In_state is true. If it is get the in state tuition of the university
+        if(obj['In_state']):
+            if(yearly_budget > unv_data.in_state):
+                raise serializers.ValidationError({'Budget Error': f'Amount ${yearly_budget} is greating than {unv_data.name} in state tuition of ${unv_data.in_state}. You will have NO Loans after school'})
+            return (unv_data.in_state - yearly_budget) * years
+        if(yearly_budget > unv_data.out_state):
+                raise serializers.ValidationError({'Budget Error': f'Amount ${yearly_budget} is greating than {unv_data.name} out state tuition of ${unv_data.out_state}. You will have NO Loans after school'})
+        return (unv_data.out_state - yearly_budget) * years
 
 

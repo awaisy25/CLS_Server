@@ -1,12 +1,11 @@
 from django.http.response import HttpResponse
-from django.shortcuts import render
 from .serializers import JobSerializer, UniversitySerializer, SalarySerializer, CalculateSerializer
 from .models import Job, University, Salary
-from django.http import Http404
+from django.forms.models import model_to_dict
 from rest_framework.views import APIView
 from rest_framework import status, generics
 from rest_framework.response import Response
-# The HTTP Operations will only have Reads to the databases no Writes
+from . import calculations
 
 class Jobs(APIView):
     def get(self, request, format=None):
@@ -29,7 +28,7 @@ class UniversityById(APIView):
             serializer = UniversitySerializer(university)
             return Response(serializer.data)
         except:
-            raise Http404
+            return Response({'Error': f'University does not have ID {pk}'}, status=status.HTTP_404_NOT_FOUND)
 
 class Salaries(generics.ListAPIView):
     def post(self, request, format=None):
@@ -60,16 +59,38 @@ class Salaries(generics.ListAPIView):
 class PayOffEstimate(APIView):
     #getting all of the fields from the form data
     def post(self, request, format=None):
-        print(request.data)
         try:
+            print(request.data)
             serializer = CalculateSerializer(data=request.data)
-            if serializer.is_valid():
-                print(serializer.data)
-                return Response(serializer.data)
-            else:
-                return Response({"Error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"Error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        if serializer.is_valid():
+            #since serializer data is immutable have to append to empty dictionary in order to add other data to the result
+            result_data = {}
+            print(serializer.data)
+            result_data.update(serializer.data)
+            #retriving the salary based on job and state. 
+            # States in database are all uppercase have to use .upper if there is a string value
+            if serializer.data['State'] == '' or serializer.data['State'] == None:
+                state = serializer.data['State']
+            else: 
+                state = serializer.data['State'].upper()
+            try:
+                salary = Salary.objects.get(job=serializer.data['Job_ID'], state=state)
+            #exception for when Salary object does not exist
+            except Salary.DoesNotExist:
+                return Response({"Error": f"Job {serializer.data['Job']['title']} not found within State {serializer.data['State']}"}, status=status.HTTP_400_BAD_REQUEST)
+            #appending salary data to result dictionary
+            Salary_data = {'Salary': {'entry': salary.entry, 'middle': salary.middle, 'senior': salary.senior}}
+            result_data.update(Salary_data)
+            #getting the estimates. Payoff time, total paid towards interests, total amount to payoff loans
+            estimates = calculations.payoff_calc(salary=salary, loan_total=result_data['Loan_total'], interest=(result_data['Interest_rate'] / 100), per_income=(result_data['Percent_income'] / 100))
+            print(estimates)
+            result_data.update(estimates)
+            return Response(result_data)
+        else:
+            return Response({"Error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
 
         
 
