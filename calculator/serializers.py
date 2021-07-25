@@ -29,8 +29,8 @@ class CalculateSerializer(serializers.Serializer):
     University = serializers.SerializerMethodField('get_unv_object')
     Loan_total = serializers.SerializerMethodField('get_loan_total')
     Years = serializers.IntegerField(max_value=6, min_value=1)
-    Percent_income = serializers.FloatField(max_value=100, min_value=1)
-    Interest_rate = serializers.FloatField(max_value=50, min_value=1)
+    Percent_income = serializers.FloatField(max_value=100, min_value=1, default=20)
+    Interest_rate = serializers.FloatField(max_value=50, min_value=1, default=5.0)
     In_state = serializers.BooleanField(default=False)
     
     #method to get the job data based on the Job_ID passed in. Share the serialized data
@@ -50,8 +50,8 @@ class CalculateSerializer(serializers.Serializer):
             return UniversitySerializer(unv_data).data
         except University.DoesNotExist:
             raise serializers.ValidationError({'University Error': f'University ID {unv_id} not exist in database'})
-    #method to get the loan total after graduation. Raise validation error is budget is greater than tuition
-    #Calculation include university tuition (in state or out state), budget and years
+    #method to get the loan total after graduation. 
+    #Raise validation error is budget is greater than tuition
     def get_loan_total(self, obj):
         unv_id = obj['University_ID']
         unv_data = University.objects.get(id=unv_id)

@@ -1,9 +1,7 @@
 from django.http.response import HttpResponse
 from .serializers import JobSerializer, UniversitySerializer, SalarySerializer, CalculateSerializer
 from .models import Job, University, Salary
-from django.forms.models import model_to_dict
 from rest_framework.views import APIView
-from rest_framework import status, generics
 from rest_framework.response import Response
 from . import calculations
 
@@ -30,7 +28,7 @@ class UniversityById(APIView):
         except:
             return Response({'Error': f'University does not have ID {pk}'}, status=status.HTTP_404_NOT_FOUND)
 
-class Salaries(generics.ListAPIView):
+class Salaries(APIView):
     def post(self, request, format=None):
         #function get salary data
         try:
@@ -80,12 +78,15 @@ class PayOffEstimate(APIView):
             #exception for when Salary object does not exist
             except Salary.DoesNotExist:
                 return Response({"Error": f"Job {serializer.data['Job']['title']} not found within State {serializer.data['State']}"}, status=status.HTTP_400_BAD_REQUEST)
+            #last validation to see if interest rate is greater than the first month payment
+            if(calculations.check_initial_payment(salary=salary.entry, loan_total=result_data['Loan_total'], interest=(result_data['Interest_rate'] / 100), per_income=(result_data['Percent_income'] / 100)) == True):
+                min_percentage_response = calculations.get_min_income_percentage(salary=salary.entry, loan_total=result_data['Loan_total'], interest=(result_data['Interest_rate'] / 100))
+                return Response({"Error": f"Amount from Salary not enough to cover Interest Rate {min_percentage_response}"}, status=status.HTTP_400_BAD_REQUEST)
             #appending salary data to result dictionary
             Salary_data = {'Salary': {'entry': salary.entry, 'middle': salary.middle, 'senior': salary.senior}}
             result_data.update(Salary_data)
             #getting the estimates. Payoff time, total paid towards interests, total amount to payoff loans
             estimates = calculations.payoff_calc(salary=salary, loan_total=result_data['Loan_total'], interest=(result_data['Interest_rate'] / 100), per_income=(result_data['Percent_income'] / 100))
-            print(estimates)
             result_data.update(estimates)
             return Response(result_data)
         else:

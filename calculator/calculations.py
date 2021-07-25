@@ -13,6 +13,7 @@ def get_min_income_percentage(salary, loan_total, interest):
     income_percentage = (interest_rate / monthly_salary) * 100#math is montly_salary * min_percentage = interest_rate, min_percentage is the value wanted
     #need to mutiply by 100 since default view is shown in hundreds
     income_percentage = round((income_percentage + 3),2) #adding 3 percent more so this way the duration isn't too long
+    print(f"income_percentage: {income_percentage}")
     if(income_percentage > 100):
         return "Interest rate is greater than selected Career Salary"
     #return round((income_percentage + 3),2)#adding 3 percent more so this way the duration isn't too long
@@ -22,7 +23,7 @@ def get_min_income_percentage(salary, loan_total, interest):
 def check_initial_payment(salary, loan_total, interest, per_income):
     payment = (salary / 12) * per_income
     interest_rate = interest_accrued(loan_total, interest)
-    return (payment > interest_rate)
+    return (interest_rate > payment)
 
     
 #recursion method to pay off the loans based on the inputs, return the num of months
@@ -49,5 +50,5 @@ def payoff_calc(salary,loan_total,interest,per_income):
     months = months - 1 if math.ceil(monthly_sal) == math.ceil(abs(loan_total)) else months
     #have a variable to show total paid in loans + interest
     amount_paid = amount_paid + interest_paid
-    results = {"Time": months, "amount_paid": round(amount_paid), "interest_paid": round(interest_paid)}
+    results = {"Time": months, "Total_paid": round(amount_paid), "Interest_paid": round(interest_paid)}
     return results
