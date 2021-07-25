@@ -5,6 +5,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from . import calculations
 
+
+#Function view to display friendly message when first getting on the initial Route
+def Intro(request):
+    return HttpResponse("Hello From Calculate Student Loans")
 class Jobs(APIView):
     def get(self, request, format=None):
         Jobs = Job.objects.all()
