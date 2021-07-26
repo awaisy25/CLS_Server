@@ -23,7 +23,7 @@ class SalarySerializer(serializers.ModelSerializer):
 class CalculateSerializer(serializers.Serializer):
     Job_ID = serializers.IntegerField()
     University_ID = serializers.IntegerField()
-    State = serializers.CharField(max_length=30, allow_blank=True, allow_null=True, default=None)
+    State = serializers.CharField(max_length=30, allow_blank=True, allow_null=True, default="US")
     Budget = serializers.FloatField()
     Job = serializers.SerializerMethodField('get_job_object')
     University = serializers.SerializerMethodField('get_unv_object')
