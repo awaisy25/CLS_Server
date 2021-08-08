@@ -1,7 +1,7 @@
 from .base import *
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['1pf0hc31cf.execute-api.us-east-2.amazonaws.com']
 
 DATABASES = {
     'default': {
