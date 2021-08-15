@@ -12,6 +12,16 @@ def Intro(request):
 class Jobs(APIView):
     def get(self, request, format=None):
         Jobs = Job.objects.all()
+        #if there is a url paramter for university = true. Then share both job and university data
+        if self.request.query_params.get('universities') is not None:
+            unv_flag = self.request.query_params.get('universities')
+            if unv_flag.upper() == 'TRUE':
+                Universities = University.objects.all()
+                unv_serializer = UniversitySerializer(Universities, many=True)
+                job_serializer = JobSerializer(Jobs, many=True)
+                #have bopth serilizers in dictionary so its easy to filter in client side
+                result_data = {"Jobs": job_serializer.data, "Universities": unv_serializer.data}
+                return Response(result_data)
         serializer = JobSerializer(Jobs, many=True)
         return Response(serializer.data)
         
@@ -30,7 +40,7 @@ class UniversityById(APIView):
             serializer = UniversitySerializer(university)
             return Response(serializer.data)
         except:
-            return Response({'Error': f'University does not have ID {pk}'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'Error': f'University does not have ID {pk}'}, status=404)
 
 class Salaries(APIView):
     def post(self, request, format=None):
