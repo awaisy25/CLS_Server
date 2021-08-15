@@ -17,7 +17,8 @@ class Jobs(APIView):
         serializer = JobSerializer(Jobs, many=True)
         logger.info("GET: Sending all Jobs")
         return Response(serializer.data)
-        
+
+
 #retrieving all university
 class Universities(APIView):
     def get(self, request, format=None):
@@ -35,9 +36,22 @@ class UniversityById(APIView):
             logger.info(f"GET: Sending University {serializer.data}")
             return Response(serializer.data)
         except:
+<<<<<<< HEAD
             logger.error(f'Error 404: University does not have ID {pk}')
+=======
+>>>>>>> 4d179bf6f336971fb788218a81662afc34b1309a
             return Response({'Error': f'University does not have ID {pk}'}, status=404)
 
+#view to retrive both the jobs and universities. url param will be jandu
+class JandU(APIView):
+    def get(self, request, format=None):
+        Jobs = Job.objects.all()
+        Universities = University.objects.all()
+        unv_serializer = UniversitySerializer(Universities, many=True)
+        job_serializer = JobSerializer(Jobs, many=True)
+        #have bopth serilizers in dictionary so its easy to filter in client side
+        result_data = {"Jobs": job_serializer.data, "Universities": unv_serializer.data}
+        return Response(result_data)
 class Salaries(APIView):
     def post(self, request, format=None):
         #function get salary data
