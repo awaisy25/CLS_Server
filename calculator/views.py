@@ -4,7 +4,9 @@ from .models import Job, University, Salary
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from . import calculations
-
+from . import Logger
+#Setting up logging
+logger = Logger.get_logger("views.py")
 
 #Function view to display friendly message when first getting on the initial Route
 def Intro(request):
@@ -13,6 +15,7 @@ class Jobs(APIView):
     def get(self, request, format=None):
         Jobs = Job.objects.all()
         serializer = JobSerializer(Jobs, many=True)
+        logger.info("GET: Sending all Jobs")
         return Response(serializer.data)
         
 #retrieving all university
@@ -20,6 +23,7 @@ class Universities(APIView):
     def get(self, request, format=None):
         Universities = University.objects.all()
         serializer = UniversitySerializer(Universities, many=True)
+        logger.info("GET: Sending all Universities")
         return Response(serializer.data)
 
 #retrieving university based by id
@@ -28,9 +32,11 @@ class UniversityById(APIView):
         try:
             university = University.objects.get(pk=pk)
             serializer = UniversitySerializer(university)
+            logger.info(f"GET: Sending University {serializer.data}")
             return Response(serializer.data)
         except:
-            return Response({'Error': f'University does not have ID {pk}'}, status=status.HTTP_404_NOT_FOUND)
+            logger.error(f'Error 404: University does not have ID {pk}')
+            return Response({'Error': f'University does not have ID {pk}'}, status=404)
 
 class Salaries(APIView):
     def post(self, request, format=None):
@@ -39,6 +45,7 @@ class Salaries(APIView):
             post_data = request.data
             #since not using seriliaizer validator, creating field validation similar to serilaizer field validation
             if 'Job_ID' not in post_data:
+                logger.error(f"Error 400: Job_ID field missing")
                 return Response({"Error": {"Job_ID": ["This field is required."]}}, status=400)
             job_id = post_data['Job_ID']
             #if state field not in or is null return US average
