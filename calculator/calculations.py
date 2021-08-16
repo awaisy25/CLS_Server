@@ -23,6 +23,7 @@ def get_min_income_percentage(salary, loan_total, interest):
 def check_initial_payment(salary, loan_total, interest, per_income):
     payment = (salary / 12) * per_income
     interest_rate = interest_accrued(loan_total, interest)
+    print(f"Check initial payment came out as {interest_rate > payment}")
     return (interest_rate > payment)
 
     

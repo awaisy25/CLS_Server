@@ -41,6 +41,7 @@ class CalculateSerializer(serializers.Serializer):
         #print(JobSerializer(job_data).data)
             return JobSerializer(job_data).data
         except Job.DoesNotExist:
+            print(f"Error in Calculate Serializer Job ID {job_id} not exist in database")
             raise serializers.ValidationError({'Job Error': f'Job ID {job_id} not exist in database'})
     #method to get the university data based on the University_ID passed in. Share the serialized data
     def get_unv_object(self, obj):
@@ -49,6 +50,7 @@ class CalculateSerializer(serializers.Serializer):
             unv_data = University.objects.get(id=unv_id)
             return UniversitySerializer(unv_data).data
         except University.DoesNotExist:
+            print(f'Error in Calculate Seriliazer University ID {unv_id} not exist in database')
             raise serializers.ValidationError({'University Error': f'University ID {unv_id} not exist in database'})
     #method to get the loan total after graduation. 
     #Raise validation error is budget is greater than tuition
@@ -60,9 +62,11 @@ class CalculateSerializer(serializers.Serializer):
         #checking if In_state is true. If it is get the in state tuition of the university
         if(obj['In_state']):
             if(yearly_budget > unv_data.in_state):
+                print(f"Error get_loan_total: Amount ${yearly_budget} is greating than {unv_data.name} in state tuition of ${unv_data.in_state}. You will have NO Loans after school")
                 raise serializers.ValidationError({'Budget Error': f'Amount ${yearly_budget} is greating than {unv_data.name} in state tuition of ${unv_data.in_state}. You will have NO Loans after school'})
             return (unv_data.in_state - yearly_budget) * years
         if(yearly_budget > unv_data.out_state):
+                print(f"Error get_loan_total: Amount ${yearly_budget} is greating than {unv_data.name} in state tuition of ${unv_data.in_state}. You will have NO Loans after school")
                 raise serializers.ValidationError({'Budget Error': f'Amount ${yearly_budget} is greating than {unv_data.name} out state tuition of ${unv_data.out_state}. You will have NO Loans after school'})
         return (unv_data.out_state - yearly_budget) * years
 
