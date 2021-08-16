@@ -1,6 +1,5 @@
 import math
 
-logger = Logger.get_logger('calculations.py')
 #function to return the accrued interest of loan after 30 days
 def interest_accrued(current_loan_total, interest_rate):
     daily_interest_rate = interest_rate / 360 #360 days since 30 days periods for 12 months

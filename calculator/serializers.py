@@ -1,8 +1,6 @@
 from rest_framework import serializers
 from .models import Job, University, Salary
-from . import Logger
 
-logger = Logger.get_logger('serializers.py')
 class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
@@ -50,7 +48,7 @@ class CalculateSerializer(serializers.Serializer):
     def get_unv_object(self, obj):
         try:
             unv_id = obj['University_ID']
-            logger.info(f"Retreivng University ID={unv_id}")
+            print(f"Retreivng University ID={unv_id}")
             unv_data = University.objects.get(id=unv_id)
             return UniversitySerializer(unv_data).data
         except University.DoesNotExist:
@@ -59,7 +57,7 @@ class CalculateSerializer(serializers.Serializer):
     #method to get the loan total after graduation. 
     #Raise validation error is budget is greater than tuition
     def get_loan_total(self, obj):
-        logger.info("Getting loan total after college")
+        print("Getting loan total after college")
         unv_id = obj['University_ID']
         unv_data = University.objects.get(id=unv_id)
         yearly_budget = obj['Budget']
