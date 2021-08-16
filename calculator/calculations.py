@@ -1,5 +1,6 @@
 import math
 
+logger = Logger.get_logger('calculations.py')
 #function to return the accrued interest of loan after 30 days
 def interest_accrued(current_loan_total, interest_rate):
     daily_interest_rate = interest_rate / 360 #360 days since 30 days periods for 12 months
@@ -22,6 +23,7 @@ def get_min_income_percentage(salary, loan_total, interest):
 #conditonal to see if the monthly payment is less than the interest rate
 def check_initial_payment(salary, loan_total, interest, per_income):
     payment = (salary / 12) * per_income
+    logger.info(f"From check_initial payment function payment is: {payment}")
     interest_rate = interest_accrued(loan_total, interest)
     print(f"Check initial payment came out as {interest_rate > payment}")
     return (interest_rate > payment)
@@ -29,9 +31,11 @@ def check_initial_payment(salary, loan_total, interest, per_income):
     
 #recursion method to pay off the loans based on the inputs, return the num of months
 def payoff_calc(salary,loan_total,interest,per_income):
+    logger.info("Pay off calculations start")
     months = 0 #month will be incremented
     amount_paid = loan_total # intial total
     interest_paid = 0 
+    logger.info("Pay off calcultions initial values loan total " + str(loan_total))
     while(loan_total > 0):
         #check how many years it has been to determin the salary. 0-3 years entry, 3-8 years middle, 8+ years senior
         if(months < 36):
