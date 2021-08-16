@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import Job, University, Salary
+from . import Logger
 
+logger = Logger.get_logger('serializers.py')
 class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
@@ -35,8 +37,9 @@ class CalculateSerializer(serializers.Serializer):
     
     #method to get the job data based on the Job_ID passed in. Share the serialized data
     def get_job_object(self, obj):
-        job_id = obj['Job_ID']
         try:
+            job_id = obj['Job_ID']
+            logger.info(f"Retreivng job ID={job_id}")
             job_data = Job.objects.get(id=job_id)
         #print(JobSerializer(job_data).data)
             return JobSerializer(job_data).data
@@ -46,6 +49,7 @@ class CalculateSerializer(serializers.Serializer):
     def get_unv_object(self, obj):
         try:
             unv_id = obj['University_ID']
+            logger.info(f"Retreivng University ID={unv_id}")
             unv_data = University.objects.get(id=unv_id)
             return UniversitySerializer(unv_data).data
         except University.DoesNotExist:
@@ -53,6 +57,7 @@ class CalculateSerializer(serializers.Serializer):
     #method to get the loan total after graduation. 
     #Raise validation error is budget is greater than tuition
     def get_loan_total(self, obj):
+        logger.info("Getting loan total after college")
         unv_id = obj['University_ID']
         unv_data = University.objects.get(id=unv_id)
         yearly_budget = obj['Budget']
@@ -60,9 +65,11 @@ class CalculateSerializer(serializers.Serializer):
         #checking if In_state is true. If it is get the in state tuition of the university
         if(obj['In_state']):
             if(yearly_budget > unv_data.in_state):
+                logger.error(f"Amount ${yearly_budget} is greating than {unv_data.name} in state tuition of ${unv_data.in_state}. You will have NO Loans after school")
                 raise serializers.ValidationError({'Budget Error': f'Amount ${yearly_budget} is greating than {unv_data.name} in state tuition of ${unv_data.in_state}. You will have NO Loans after school'})
             return (unv_data.in_state - yearly_budget) * years
         if(yearly_budget > unv_data.out_state):
+                logger.error(f"Amount ${yearly_budget} is greating than {unv_data.name} out state tuition of ${unv_data.out_state}. You will have NO Loans after school")
                 raise serializers.ValidationError({'Budget Error': f'Amount ${yearly_budget} is greating than {unv_data.name} out state tuition of ${unv_data.out_state}. You will have NO Loans after school'})
         return (unv_data.out_state - yearly_budget) * years
 
