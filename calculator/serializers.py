@@ -37,7 +37,7 @@ class CalculateSerializer(serializers.Serializer):
     def get_job_object(self, obj):
         try:
             job_id = obj['Job_ID']
-            logger.info(f"Retreivng job ID={job_id}")
+            print(f"Retreivng job ID={job_id}")
             job_data = Job.objects.get(id=job_id)
         #print(JobSerializer(job_data).data)
             return JobSerializer(job_data).data
