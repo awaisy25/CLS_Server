@@ -11,24 +11,32 @@ def Intro(request):
     return HttpResponse("Hello From Calculate Student Loans")
 class Jobs(APIView):
     def get(self, request, format=None):
-        Jobs = Job.objects.all()
-        serializer = JobSerializer(Jobs, many=True)
-        print("GET: Sending all Jobs")
-        return Response(serializer.data)
+        try:
+            print("GET Request - Retrieving all Jobs")
+            Jobs = Job.objects.all()
+            serializer = JobSerializer(Jobs, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            print(f"Unexpected Error: {str(e)}")
+            return Response({"Error": f"Unexpected Error: {str(e)}"}, status=400)
 
 
 #retrieving all university
 class Universities(APIView):
     def get(self, request, format=None):
-        Universities = University.objects.all()
-        serializer = UniversitySerializer(Universities, many=True)
-        print("GET: Sending all Universities")
-        return Response(serializer.data)
-
+        try:
+            print("GET Request - Retrieving all Universities")
+            Universities = University.objects.all()
+            serializer = UniversitySerializer(Universities, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            print(f"Unexpected Error: {str(e)}")
+            return Response({"Error": f"Unexpected Error: {str(e)}"}, status=400)
 #retrieving university based by id
 class UniversityById(APIView):
     def get(self, request, pk, format=None):
         try:
+            print(f"GET Request - Retrieiving University with ID {pk}")
             university = University.objects.get(pk=pk)
             serializer = UniversitySerializer(university)
             print(f"GET: Sending University {serializer.data}")
@@ -40,14 +48,18 @@ class UniversityById(APIView):
 #view to retrive both the jobs and universities. url param will be jandu
 class JandU(APIView):
     def get(self, request, format=None):
-        Jobs = Job.objects.all()
-        Universities = University.objects.all()
-        unv_serializer = UniversitySerializer(Universities, many=True)
-        job_serializer = JobSerializer(Jobs, many=True)
-        #have both serilizers in dictionary so its easy to filter in client side
-        result_data = {"Jobs": job_serializer.data, "Universities": unv_serializer.data}
-        print(f'GET: Sending both Jobs and Universities')
-        return Response(result_data)
+        try:
+            Jobs = Job.objects.all()
+            Universities = University.objects.all()
+            unv_serializer = UniversitySerializer(Universities, many=True)
+            job_serializer = JobSerializer(Jobs, many=True)
+            #have both serilizers in dictionary so its easy to filter in client side
+            result_data = {"Jobs": job_serializer.data, "Universities": unv_serializer.data}
+            print(f'GET: Sending both Jobs and Universities')
+            return Response(result_data)
+        except Exception as e:
+            print(f"Unexpected Error: {str(e)}")
+            return Response({"Error": f"Unexpected Error: {str(e)}"}, status=400)
 class Salaries(APIView):
     def post(self, request, format=None):
         #function get salary data
