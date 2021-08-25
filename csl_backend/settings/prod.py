@@ -2,7 +2,6 @@ from .base import *
 DEBUG = True
 
 ALLOWED_HOSTS = ['1pf0hc31cf.execute-api.us-east-2.amazonaws.com']
-CORS_ALLOW_ALL_ORIGINS = True
 #CORS_ALLOWED_ORIGINS = [""]
 
 DATABASES = {

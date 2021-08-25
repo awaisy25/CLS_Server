@@ -9,7 +9,7 @@ class JobSerializer(serializers.ModelSerializer):
 class UniversitySerializer(serializers.ModelSerializer):
     class Meta:
         model = University
-        fields = ["id", "name", "in_state", "out_state"]
+        fields = ["id", "title", "in_state", "out_state"]
 
 
 class SalarySerializer(serializers.ModelSerializer):

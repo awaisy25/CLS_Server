@@ -8,13 +8,13 @@ class Job(models.Model):
         return f"{self.title}"
 
 class University(models.Model):
-    name = models.CharField(max_length=100)
+    title = models.CharField(max_length=100)
     
     in_state= models.IntegerField()
     out_state = models.IntegerField()
     
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.title}"
 
 class Salary(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE) #many to one relationship with job title
