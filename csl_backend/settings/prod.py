@@ -1,5 +1,5 @@
 from .base import *
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['1pf0hc31cf.execute-api.us-east-2.amazonaws.com']
 #CORS_ALLOWED_ORIGINS = [""]
