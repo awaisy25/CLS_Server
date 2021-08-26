@@ -20,3 +20,4 @@ urlpatterns = [
     path("", include("calculator.urls"), name="calculator"),
     path('admin/', admin.site.urls),
 ]
+handler404 = 'utils.Errorviews.error_404'

@@ -101,7 +101,7 @@ class PayOffEstimate(APIView):
         except Exception as e:
             print("Error 400: Something went wrong in Serializer")
             return Response({"Error": str(e)}, status=404)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             print("POST: Creating and returning calculations")
             #since serializer data is immutable have to append to empty dictionary in order to add other data to the result
             result_data = {}

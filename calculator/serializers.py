@@ -70,14 +70,15 @@ class CalculateSerializer(serializers.Serializer):
             yearly_budget = obj['Budget']
             years = obj['Years']
             #checking if In_state is true. If it is get the in state tuition of the university
+            
             if(obj['In_state']):
                 if(yearly_budget > unv_data.in_state):
                     print(f"Error: Amount ${yearly_budget} is greating than {unv_data.title} in state tuition of ${unv_data.in_state}. You will have NO Loans after school")
-                    raise serializers.ValidationError({f'Amount ${yearly_budget} is greating than {unv_data.title} in state tuition of ${unv_data.in_state}. You will have NO Loans after school'})
+                    raise serializers.ValidationError({'Loan Total Error': f'Amount ${yearly_budget} is greating than {unv_data.title} in state tuition of ${unv_data.in_state}. You will have NO Loans after school'})
                 return (unv_data.in_state - yearly_budget) * years
             if(yearly_budget > unv_data.out_state):
-                    print(f"Error: Amount ${yearly_budget} is greating than {unv_data.title} in state tuition of ${unv_data.in_state}. You will have NO Loans after school")
-                    raise serializers.ValidationError({f'Amount ${yearly_budget} is greating than {unv_data.title} out state tuition of ${unv_data.out_state}. You will have NO Loans after school'})
+                    print(f"Loan Total Error: Amount ${yearly_budget} is greating than {unv_data.title} in state tuition of ${unv_data.in_state}. You will have NO Loans after school")
+                    raise serializers.ValidationError({'Loan Total Error': f'Amount ${yearly_budget} is greating than {unv_data.title} out state tuition of ${unv_data.out_state}. You will have NO Loans after school'})
             return (unv_data.out_state - yearly_budget) * years
         except University.DoesNotExist:
             print(f'Error in Calculate Seriliazer University ID {unv_id} not exist in database')
