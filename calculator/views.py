@@ -18,7 +18,8 @@ class Jobs(APIView):
             return Response(serializer.data)
         except Exception as e:
             print(f"Unexpected Error: {str(e)}")
-            return Response({"Error": f"Unexpected Error: {str(e)}"}, status=400)
+            #these errors client doesn't need a response
+            return Response({"Error": f"Unexpected Error: {str(e)}"}, status=404)
 
 
 #retrieving all university
@@ -31,7 +32,7 @@ class Universities(APIView):
             return Response(serializer.data)
         except Exception as e:
             print(f"Unexpected Error: {str(e)}")
-            return Response({"Error": f"Unexpected Error: {str(e)}"}, status=400)
+            return Response({"Error": f"Unexpected Error: {str(e)}"}, status=404)
 #retrieving university based by id
 class UniversityById(APIView):
     def get(self, request, pk, format=None):
@@ -59,7 +60,8 @@ class JandU(APIView):
             return Response(result_data)
         except Exception as e:
             print(f"Unexpected Error: {str(e)}")
-            return Response({"Error": f"Unexpected Error: {str(e)}"}, status=400)
+            #these errors don't need to return a message to the client
+            return Response({"Error": f"Unexpected Error: {str(e)}"}, status=404)
 class Salaries(APIView):
     def post(self, request, format=None):
         #function get salary data
@@ -68,7 +70,7 @@ class Salaries(APIView):
             #since not using seriliaizer validator, creating field validation similar to serilaizer field validation
             if 'Job_ID' not in post_data:
                 print(f"Error 400: Job_ID field missing")
-                return Response({"Error": {"Job_ID": ["This field is required."]}}, status=400)
+                return Response({"Error": {"Job_ID": ["This field is required."]}}, status=404)
             job_id = post_data['Job_ID']
             #if state field not in or is null return US average
             if 'State' not in post_data or post_data['State'] == '' or post_data['State'] == None:
@@ -81,11 +83,12 @@ class Salaries(APIView):
             print(f"POST: Sending Salary data {serializer.data}")
             return Response(serializer.data)
         except Salary.DoesNotExist:
-            print(f"Error 404: Job not found within {state}")
-            return Response({"Error": f"Job not found within state {state}"}, status=404)
+            print(f"Error: Job not found within {state}")
+            return Response({"Status": 400, "Message":  f"Job not found within state {state}"})
         except Exception as e:
-            print(f"Error 400: {str(e)}")
-            return Response({"Error": str(e)}, status=400)
+            print(f"Error: {str(e)}")
+            #these errors don't send a response to the client
+            return Response({"Error": str(e)}, status=404)
 
 #this is the method that will have the calculation logic and functionality
 class PayOffEstimate(APIView):
@@ -96,7 +99,7 @@ class PayOffEstimate(APIView):
             serializer = CalculateSerializer(data=request.data)
         except Exception as e:
             print("Error 400: Something went wrong in Serializer")
-            return Response({"Error": str(e)}, status=400)
+            return Response({"Error": str(e)}, status=404)
         if serializer.is_valid():
             print("POST: Creating and returning calculations")
             #since serializer data is immutable have to append to empty dictionary in order to add other data to the result
@@ -116,13 +119,13 @@ class PayOffEstimate(APIView):
                 print(f"Salary object {str(salary)}")
             #exception for when Salary object does not exist
             except Salary.DoesNotExist:
-                print(F"Error 404: Job {serializer.data['Job']['title']} not found within State {serializer.data['State']}")
-                return Response({"Error": f"Job {serializer.data['Job']['title']} not found within State {serializer.data['State']}"}, status=404)
+                print(F"Error: Job {serializer.data['Job']['title']} not found within State {serializer.data['State']}")
+                return Response({"Status": 400, "Message": f"Job {serializer.data['Job']['title']} not found within State {serializer.data['State']}"})
             #last validation to see if interest rate is greater than the first month payment
             if(calculations.check_initial_payment(salary=salary.entry, loan_total=result_data['Loan_total'], interest=(result_data['Interest_rate'] / 100), per_income=(result_data['Percent_income'] / 100)) == True):
                 min_percentage_response = calculations.get_min_income_percentage(salary=salary.entry, loan_total=result_data['Loan_total'], interest=(result_data['Interest_rate'] / 100))
-                print(f"Error 404: Amount from Salary not enough to cover Interest Rate {min_percentage_response}")
-                return Response({"Error": f"Amount from Salary not enough to cover Interest Rate {min_percentage_response}"}, status=404)
+                print(f"Error: Amount from Salary not enough to cover Interest Rate {min_percentage_response}")
+                return Response({"Status": 400, "Message": f"Amount from Salary not enough to cover Interest Rate {min_percentage_response}"})
             #appending salary data to result dictionary
             Salary_data = {'Salary': {'entry': salary.entry, 'middle': salary.middle, 'senior': salary.senior}}
             result_data.update(Salary_data)
@@ -136,7 +139,7 @@ class PayOffEstimate(APIView):
             return Response(result_data)
         else:
             print(f"Unexpected error {serializer.errors}")
-            return Response({"Error": serializer.errors}, status=400)
+            return Response({"Status": 400, "Message": serializer.errors})
 
 
         
