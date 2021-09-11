@@ -14,7 +14,7 @@ class Jobs(APIView):
     def get(self, request, format=None):
         try:
             print("GET Request - Retrieving all Jobs")
-            Jobs = Job.objects.all()
+            Jobs = Job.objects.order_by("title")
             serializer = JobSerializer(Jobs, many=True)
             return Response(serializer.data)
         except Exception as e:
@@ -51,7 +51,7 @@ class UniversityById(APIView):
 class JandU(APIView):
     def get(self, request, format=None):
         try:
-            Jobs = Job.objects.all()
+            Jobs = Job.objects.order_by("title")
             Universities = University.objects.all()
             unv_serializer = UniversitySerializer(Universities, many=True)
             job_serializer = JobSerializer(Jobs, many=True)
